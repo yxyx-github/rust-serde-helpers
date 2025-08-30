@@ -17,8 +17,16 @@ pub enum WriteXMLFileError {
     SeError(SeError),
 }
 
-// TODO: make it derivable
 pub trait FromXML: for<'de> Deserialize<'de> {
+    fn from_xml(xml: &str) -> Result<Self, DeError>;
+
+    fn from_xml_file_by_path<P: AsRef<Path>>(path: P) -> Result<Self, ReadXMLFileError>;
+}
+
+impl<T> FromXML for T
+where
+    T: for<'de> Deserialize<'de>,
+{
     fn from_xml(xml: &str) -> Result<Self, DeError> {
         de::from_str(xml)
     }
@@ -32,8 +40,16 @@ pub trait FromXML: for<'de> Deserialize<'de> {
     }
 }
 
-// TODO: make it derivable
 pub trait ToXML: Serialize {
+    fn to_xml(&self) -> Result<String, SeError>;
+
+    fn to_xml_file_by_path<P: AsRef<Path>>(&self, path: P) -> Result<(), WriteXMLFileError>;
+}
+
+impl<T> ToXML for T
+where
+    T: Serialize,
+{
     fn to_xml(&self) -> Result<String, SeError> {
         se::to_string(self)
     }
