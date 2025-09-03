@@ -41,21 +41,27 @@ where
 }
 
 pub trait ToXML: Serialize {
-    fn to_xml(&self) -> Result<String, SeError>;
+    fn to_xml(&self, declaration_header: bool) -> Result<String, SeError>;
 
-    fn to_xml_file_by_path<P: AsRef<Path>>(&self, path: P) -> Result<(), WriteXMLFileError>;
+    fn to_xml_file_by_path<P: AsRef<Path>>(&self, path: P, declaration_header: bool) -> Result<(), WriteXMLFileError>;
 }
 
 impl<T> ToXML for T
 where
     T: Serialize,
 {
-    fn to_xml(&self) -> Result<String, SeError> {
-        se::to_string(self)
+    fn to_xml(&self, declaration_header: bool) -> Result<String, SeError> {
+        if declaration_header {
+            let mut serialized = String::from(r#"<?xml version="1.0" encoding="UTF-8"?>"#);
+            serialized.push_str(&se::to_string(self)?);
+            Ok(serialized)
+        } else {
+            se::to_string(self)
+        }
     }
 
-    fn to_xml_file_by_path<P: AsRef<Path>>(&self, path: P) -> Result<(), WriteXMLFileError> {
-        let xml = self.to_xml()
+    fn to_xml_file_by_path<P: AsRef<Path>>(&self, path: P, declaration_header: bool) -> Result<(), WriteXMLFileError> {
+        let xml = self.to_xml(declaration_header)
             .map_err(|err| WriteXMLFileError::SeError(err))?;
         fs::write(path, xml).map_err(|err| WriteXMLFileError::IOError(err))?;
         Ok(())
