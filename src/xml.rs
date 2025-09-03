@@ -63,6 +63,9 @@ where
     fn to_xml_file_by_path<P: AsRef<Path>>(&self, path: P, declaration_header: bool) -> Result<(), WriteXMLFileError> {
         let xml = self.to_xml(declaration_header)
             .map_err(|err| WriteXMLFileError::SeError(err))?;
+        if let Some(parent) = path.as_ref().parent() {
+            fs::create_dir_all(parent).map_err(|err| WriteXMLFileError::IOError(err))?;
+        }
         fs::write(path, xml).map_err(|err| WriteXMLFileError::IOError(err))?;
         Ok(())
     }
