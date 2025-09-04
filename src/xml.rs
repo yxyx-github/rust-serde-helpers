@@ -2,18 +2,25 @@ use std::{fs, io};
 use std::path::Path;
 use quick_xml::{de, se, DeError, SeError};
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
 
 pub mod test_utils;
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub enum ReadXMLFileError {
+    #[error("{0}")]
     IOError(io::Error),
+
+    #[error("Couldn't deserialize: {0}")]
     DeError(DeError),
 }
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub enum WriteXMLFileError {
+    #[error("{0}")]
     IOError(io::Error),
+
+    #[error("Couldn't serialize: {0}")]
     SeError(SeError),
 }
 
