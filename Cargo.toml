@@ -4,14 +4,14 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-quick-xml = { version = "0.38", features = ["serialize", "overlapped-lists"] }
-regex = "1.11"
-serde = { version = "1.0", features = ["derive"] }
-thiserror = "2.0"
-time = { version = "0.3", features = ["macros", "serde-human-readable"] }
+quick-xml = { version = "0.40.1", features = ["serialize", "overlapped-lists"] }
+regex = "1.12.3"
+serde = { version = "1.0.228", features = ["derive"] }
+thiserror = "2.0.18"
+time = { version = "0.3.47", features = ["macros", "serde-human-readable"] }
 
 [dev-dependencies]
-tempfile = "3.12"
+tempfile = "3.27.0"
 
 [profile.dev]
 debug = 'line-tables-only'
