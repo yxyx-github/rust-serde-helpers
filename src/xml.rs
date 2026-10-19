@@ -1,5 +1,5 @@
 use quick_xml::se::Serializer;
-use quick_xml::{de, DeError, SeError};
+use quick_xml::{DeError, SeError, de};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 use std::{fs, io};
@@ -28,7 +28,7 @@ pub enum WriteXMLFileError {
 pub trait FromXML: for<'de> Deserialize<'de> {
     fn from_xml(xml: &str) -> Result<Self, DeError>;
 
-    fn from_xml_file_by_path<P: AsRef<Path>>(path: P) -> Result<Self, ReadXMLFileError>;
+    fn from_xml_file_by_path(path: impl AsRef<Path>) -> Result<Self, ReadXMLFileError>;
 }
 
 impl<T> FromXML for T
@@ -39,7 +39,7 @@ where
         de::from_str(xml)
     }
 
-    fn from_xml_file_by_path<P: AsRef<Path>>(path: P) -> Result<Self, ReadXMLFileError> {
+    fn from_xml_file_by_path(path: impl AsRef<Path>) -> Result<Self, ReadXMLFileError> {
         let xml = fs::read_to_string(path).map_err(|err| ReadXMLFileError::IOError(err))?;
         Ok(
             Self::from_xml(&xml)
@@ -51,7 +51,7 @@ where
 pub trait ToXML: Serialize {
     fn to_xml(&self, declaration_header: bool) -> Result<String, SeError>;
 
-    fn to_xml_file_by_path<P: AsRef<Path>>(&self, path: P, declaration_header: bool) -> Result<(), WriteXMLFileError>;
+    fn to_xml_file_by_path(&self, path: impl AsRef<Path>, declaration_header: bool) -> Result<(), WriteXMLFileError>;
 }
 
 impl<T> ToXML for T
@@ -73,7 +73,7 @@ where
         })
     }
 
-    fn to_xml_file_by_path<P: AsRef<Path>>(&self, path: P, declaration_header: bool) -> Result<(), WriteXMLFileError> {
+    fn to_xml_file_by_path(&self, path: impl AsRef<Path>, declaration_header: bool) -> Result<(), WriteXMLFileError> {
         let xml = self.to_xml(declaration_header)
             .map_err(|err| WriteXMLFileError::SeError(err))?;
         if let Some(parent) = path.as_ref().parent() {
