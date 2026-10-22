@@ -10,19 +10,19 @@ pub mod test_utils;
 #[derive(Error, Debug)]
 pub enum ReadXMLFileError {
     #[error("{0}")]
-    IOError(io::Error),
+    IOError(#[from] io::Error),
 
     #[error("Couldn't deserialize: {0}")]
-    DeError(DeError),
+    DeError(#[from] DeError),
 }
 
 #[derive(Error, Debug)]
 pub enum WriteXMLFileError {
     #[error("{0}")]
-    IOError(io::Error),
+    IOError(#[from] io::Error),
 
     #[error("Couldn't serialize: {0}")]
-    SeError(SeError),
+    SeError(#[from] SeError),
 }
 
 pub trait FromXML: for<'de> Deserialize<'de> {
@@ -40,11 +40,8 @@ where
     }
 
     fn from_xml_file_by_path(path: impl AsRef<Path>) -> Result<Self, ReadXMLFileError> {
-        let xml = fs::read_to_string(path).map_err(|err| ReadXMLFileError::IOError(err))?;
-        Ok(
-            Self::from_xml(&xml)
-                .map_err(|err| ReadXMLFileError::DeError(err))?
-        )
+        let xml = fs::read_to_string(path)?;
+        Ok(Self::from_xml(&xml)?)
     }
 }
 
@@ -74,12 +71,11 @@ where
     }
 
     fn to_xml_file_by_path(&self, path: impl AsRef<Path>, declaration_header: bool) -> Result<(), WriteXMLFileError> {
-        let xml = self.to_xml(declaration_header)
-            .map_err(|err| WriteXMLFileError::SeError(err))?;
+        let xml = self.to_xml(declaration_header)?;
         if let Some(parent) = path.as_ref().parent() {
-            fs::create_dir_all(parent).map_err(|err| WriteXMLFileError::IOError(err))?;
+            fs::create_dir_all(parent)?;
         }
-        fs::write(path, xml).map_err(|err| WriteXMLFileError::IOError(err))?;
+        fs::write(path, xml)?;
         Ok(())
     }
 }
