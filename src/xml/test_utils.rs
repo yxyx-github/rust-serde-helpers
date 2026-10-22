@@ -2,7 +2,7 @@ use regex::Regex;
 use std::fs;
 use std::path::Path;
 
-pub fn read_xml_file<P: AsRef<Path>>(path: P) -> String {
+pub fn read_xml_file(path: impl AsRef<Path>) -> String {
     let raw_xml = fs::read_to_string(path).unwrap();
     cleanup_xml(raw_xml)
 }
